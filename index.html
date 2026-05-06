@@ -242,14 +242,16 @@
   /* ── Wrong card toast ── */
   #wrong-card-toast{
     position:absolute;bottom:16px;left:16px;right:16px;
-    background:rgba(224,65,90,0.92);backdrop-filter:blur(8px);
-    border:1px solid rgba(224,65,90,0.5);
+    background:rgba(220,60,20,0.88);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,100,40,0.6);
     border-radius:14px;padding:14px 18px;
     text-align:center;font-size:13px;font-weight:700;color:#fff;letter-spacing:.2px;
     pointer-events:none;
     opacity:0;transform:translateY(8px);
     transition:opacity .2s ease,transform .2s ease;
     z-index:10;
+    box-shadow:0 0 18px rgba(255,80,20,0.55),0 0 40px rgba(255,60,10,0.3),inset 0 1px 0 rgba(255,140,80,0.25);
+    text-shadow:0 0 12px rgba(255,160,80,0.8);
   }
   #wrong-card-toast.show{opacity:1;transform:translateY(0)}
 </style>
