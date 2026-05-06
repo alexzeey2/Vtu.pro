@@ -239,21 +239,51 @@
 
   .spc{height:28px}
 
-  /* ── Wrong card toast ── */
-  #wrong-card-toast{
-    position:absolute;bottom:16px;left:16px;right:16px;
-    background:rgba(220,60,20,0.88);backdrop-filter:blur(8px);
-    border:1px solid rgba(255,100,40,0.6);
-    border-radius:14px;padding:14px 18px;
-    text-align:center;font-size:13px;font-weight:700;color:#fff;letter-spacing:.2px;
-    pointer-events:none;
-    opacity:0;transform:translateY(8px);
-    transition:opacity .2s ease,transform .2s ease;
-    z-index:10;
-    box-shadow:0 0 18px rgba(255,80,20,0.55),0 0 40px rgba(255,60,10,0.3),inset 0 1px 0 rgba(255,140,80,0.25);
-    text-shadow:0 0 12px rgba(255,160,80,0.8);
+  /* ── Wrong card overlay ── */
+  #wrong-card-overlay{
+    position:absolute;inset:0;
+    background:rgba(10,8,20,0.82);backdrop-filter:blur(6px);
+    border-radius:20px;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:20;
   }
-  #wrong-card-toast.show{opacity:1;transform:translateY(0)}
+  #wrong-card-overlay.show{opacity:1;pointer-events:auto;}
+  #wrong-card-modal{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:28px 24px 24px;
+    background:rgba(30,12,6,0.92);
+    border:1.5px solid rgba(255,90,30,0.55);
+    border-radius:22px;
+    box-shadow:0 0 30px rgba(255,70,10,0.45),0 0 70px rgba(255,50,0,0.2);
+    width:78%;max-width:280px;
+    text-align:center;
+    animation:none;
+  }
+  #wrong-card-overlay.show #wrong-card-modal{
+    animation:wc-pop .25s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes wc-pop{
+    from{transform:scale(.88);opacity:0;}
+    to{transform:scale(1);opacity:1;}
+  }
+  #wrong-card-icon{
+    width:52px;height:52px;border-radius:50%;
+    background:rgba(220,55,10,0.18);
+    border:2px solid rgba(255,90,30,0.6);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;color:#ff6020;
+    box-shadow:0 0 18px rgba(255,70,10,0.5),inset 0 0 12px rgba(255,80,20,0.15);
+    text-shadow:0 0 10px rgba(255,120,40,0.9);
+  }
+  #wrong-card-title{
+    font-size:17px;font-weight:800;color:#ff7030;letter-spacing:.3px;
+    text-shadow:0 0 16px rgba(255,100,30,0.7);
+  }
+  #wrong-card-body{
+    font-size:12.5px;color:rgba(255,200,170,0.75);line-height:1.6;
+  }
 </style>
 </head>
 <body>
@@ -269,21 +299,34 @@
 
   <div class="reg-box">
 
-    <!-- Step 1: Username only -->
+    <!-- Step 1: Create password -->
     <div class="reg-step active" id="reg-step-1">
       <div class="reg-title">Create your account</div>
-      <div class="reg-sub">Enter a username to get started</div>
+      <div class="reg-sub">Choose an 8-character password to secure your account</div>
 
       <div class="reg-field">
-        <div class="reg-field-lbl">Username</div>
-        <input type="text" id="reg-username" placeholder="e.g. alex123" autocomplete="off">
+        <div class="reg-field-lbl">Password</div>
+        <input type="password" id="reg-password" placeholder="8 characters" autocomplete="off" maxlength="8">
       </div>
       <div class="reg-err" id="reg-err-1"></div>
       <button class="reg-btn" onclick="goRegStep2()">Continue</button>
     </div>
 
-    <!-- Step 2: Scan QR card -->
+    <!-- Step 2: Confirm password -->
     <div class="reg-step" id="reg-step-2">
+      <div class="reg-title">Confirm password</div>
+      <div class="reg-sub">Re-enter your password to confirm</div>
+
+      <div class="reg-field">
+        <div class="reg-field-lbl">Confirm Password</div>
+        <input type="password" id="reg-password-confirm" placeholder="8 characters" autocomplete="off" maxlength="8">
+      </div>
+      <div class="reg-err" id="reg-err-2"></div>
+      <button class="reg-btn" onclick="goRegStep3()">Continue</button>
+    </div>
+
+    <!-- Step 3: Scan QR card -->
+    <div class="reg-step" id="reg-step-3">
       <div class="reg-title">Scan your Tesira card</div>
       <div class="reg-sub">Point your camera at the QR code on your card</div>
 
@@ -301,7 +344,7 @@
       </div>
 
       <div id="reg-scan-status" style="text-align:center;font-size:13px;color:var(--w40);margin-bottom:20px;">Starting camera...</div>
-      <div class="reg-err" id="reg-err-2"></div>
+      <div class="reg-err" id="reg-err-3"></div>
     </div>
 
   </div>
@@ -727,7 +770,14 @@
           <div style="position:absolute;bottom:0;right:0;width:32px;height:32px;border-bottom:3px solid var(--p-light);border-right:3px solid var(--p-light);border-radius:0 0 4px 0;"></div>
         </div>
       </div>
-      <div id="wrong-card-toast">✕ Wrong card — use your registered Tesira card</div>
+      <!-- Wrong card full overlay -->
+      <div id="wrong-card-overlay">
+        <div id="wrong-card-modal">
+          <div id="wrong-card-icon">✕</div>
+          <div id="wrong-card-title">Wrong Card</div>
+          <div id="wrong-card-body">This isn't your registered Tesira card.<br>Move camera away and try again.</div>
+        </div>
+      </div>
     </div>
     <div id="buy-scan-status" style="text-align:center;font-size:13px;color:var(--w40);margin-bottom:16px;">Waiting for QR code...</div>
     <button class="pin-cancel" onclick="closeBuyScan()">Cancel</button>
@@ -762,24 +812,40 @@
   }
 
   // ── Extract 4-digit secret from 10-digit code ──
-  // Always picks positions 1, 4, 6, 9 (0-indexed) — only the app knows this
   function extractSecret(code10) {
     return code10[1] + code10[4] + code10[6] + code10[9];
   }
 
-  // ── Registration Step 1 ──
+  // ── Generate username from card number ──
+  function generateUsername(card10) {
+    const adjectives = ['swift','bold','bright','calm','cool','deep','fast','keen','pure','wise'];
+    const nouns = ['lion','eagle','river','stone','flame','tide','wind','spark','cloud','peak'];
+    const adj = adjectives[parseInt(card10[2]) % adjectives.length];
+    const noun = nouns[parseInt(card10[7]) % nouns.length];
+    const suffix = card10.slice(0, 4);
+    return adj + '_' + noun + '_' + suffix;
+  }
+
+  // ── Registration Step 1: validate password ──
   function goRegStep2() {
-    const u = document.getElementById('reg-username').value.trim();
+    const pw = document.getElementById('reg-password').value;
     const err = document.getElementById('reg-err-1');
-    if (!u) { showErr(err, 'Please enter a username'); return; }
-    username = u;
-    // Auto-generate unique ID prefix (6 random digits + username)
-    const uid = Math.floor(100000 + Math.random() * 900000);
-    document.getElementById('ref-link').textContent = 'tesira.app/ref/' + uid + u.toUpperCase();
+    if (pw.length < 8) { showErr(err, 'Password must be 8 characters'); return; }
     err.classList.remove('show');
     document.getElementById('reg-step-1').classList.remove('active');
     document.getElementById('reg-step-2').classList.add('active');
-    // Auto-start camera — this triggers the browser permission prompt
+    document.getElementById('reg-password-confirm').focus();
+  }
+
+  // ── Registration Step 2: confirm password ──
+  function goRegStep3() {
+    const pw = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-password-confirm').value;
+    const err = document.getElementById('reg-err-2');
+    if (confirm !== pw) { showErr(err, 'Passwords do not match'); return; }
+    err.classList.remove('show');
+    document.getElementById('reg-step-2').classList.remove('active');
+    document.getElementById('reg-step-3').classList.add('active');
     startRegScan();
   }
 
@@ -830,6 +896,10 @@
         clearTimeout(regScanLoop);
         registeredCard = code.data;
         cardSecret = extractSecret(code.data);
+        // Generate username from card
+        username = generateUsername(code.data);
+        const uid = Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('ref-link').textContent = 'tesira.app/ref/' + uid + username.toUpperCase();
         document.getElementById('reg-scan-status').textContent = '✓ Card linked successfully!';
         setTimeout(finishReg, 800);
         return;
@@ -898,7 +968,7 @@
 
   function scanBuyFrame() {
     const video = document.getElementById('buy-video');
-    const toast = document.getElementById('wrong-card-toast');
+    const overlay = document.getElementById('wrong-card-overlay');
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -908,7 +978,7 @@
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       if (code && code.data === registeredCard) {
-        toast.classList.remove('show');
+        overlay.classList.remove('show');
         stopStream(buyStream);
         clearTimeout(buyScanLoop);
         document.getElementById('qr-buy-ov').classList.remove('open');
@@ -919,9 +989,9 @@
         document.getElementById('ov').classList.add('open');
         return;
       } else if (code && code.data !== registeredCard) {
-        toast.classList.add('show');
+        overlay.classList.add('show');
       } else {
-        toast.classList.remove('show');
+        overlay.classList.remove('show');
       }
     }
     buyScanLoop = setTimeout(scanBuyFrame, 200);
