@@ -238,6 +238,20 @@
   .dep-opt.sel{background:var(--p-subtle);border-color:var(--p);color:var(--p-light)}
 
   .spc{height:28px}
+
+  /* ── Wrong card toast ── */
+  #wrong-card-toast{
+    position:absolute;bottom:16px;left:16px;right:16px;
+    background:rgba(224,65,90,0.92);backdrop-filter:blur(8px);
+    border:1px solid rgba(224,65,90,0.5);
+    border-radius:14px;padding:14px 18px;
+    text-align:center;font-size:13px;font-weight:700;color:#fff;letter-spacing:.2px;
+    pointer-events:none;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .2s ease,transform .2s ease;
+    z-index:10;
+  }
+  #wrong-card-toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -711,6 +725,7 @@
           <div style="position:absolute;bottom:0;right:0;width:32px;height:32px;border-bottom:3px solid var(--p-light);border-right:3px solid var(--p-light);border-radius:0 0 4px 0;"></div>
         </div>
       </div>
+      <div id="wrong-card-toast">✕ Wrong card — use your registered Tesira card</div>
     </div>
     <div id="buy-scan-status" style="text-align:center;font-size:13px;color:var(--w40);margin-bottom:16px;">Waiting for QR code...</div>
     <button class="pin-cancel" onclick="closeBuyScan()">Cancel</button>
@@ -881,6 +896,7 @@
 
   function scanBuyFrame() {
     const video = document.getElementById('buy-video');
+    const toast = document.getElementById('wrong-card-toast');
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -890,11 +906,10 @@
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       if (code && code.data === registeredCard) {
-        // Card matches — open buy sheet
+        toast.classList.remove('show');
         stopStream(buyStream);
         clearTimeout(buyScanLoop);
         document.getElementById('qr-buy-ov').classList.remove('open');
-        // Pre-fill sheet and open
         document.getElementById('shtitle').textContent = 'Buy ' + cur.size + ' Data';
         document.getElementById('shsub').textContent = NET + ' · ' + cur.val;
         document.getElementById('dprice').textContent = '₦' + cur.price.toLocaleString();
@@ -902,7 +917,9 @@
         document.getElementById('ov').classList.add('open');
         return;
       } else if (code && code.data !== registeredCard) {
-        document.getElementById('buy-scan-status').textContent = '✗ Wrong card. Use your registered Tesira card.';
+        toast.classList.add('show');
+      } else {
+        toast.classList.remove('show');
       }
     }
     buyScanLoop = setTimeout(scanBuyFrame, 200);
